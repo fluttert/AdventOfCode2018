@@ -82,9 +82,7 @@ namespace AdventOfCode._2018
             }
         }
 
-        public static string input2 = "bababc";
-
-        public static string input = @"dghfbsyiznoumojleevappwqtr
+        public readonly static string input = @"dghfbsyiznoumojleevappwqtr
 dghfbsyiznoumkjljevacpmqer
 dghfbbyizioumkjlxevacpwdtr
 dghfbsesznoumkjlxevacpwqkr
