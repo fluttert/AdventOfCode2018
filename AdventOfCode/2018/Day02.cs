@@ -30,56 +30,79 @@ namespace AdventOfCode._2018
             Console.WriteLine($"Day02 part1 answer:{doubleChars * tripleChars}");
 
             // PART 02
-            var countedChars = new Dictionary<string, Dictionary<char, int>>();
-            foreach (string line in inputLines)
-            {
-                var characterCount = new Dictionary<char, int>();
-                for (int i = 0; i < line.Length; i++)
-                {
-                    char curChar = line[i];
-                    if (characterCount.ContainsKey(curChar)) { characterCount[curChar]++; }
-                    else { characterCount.Add(curChar, 1); }
-                }
-                countedChars.Add(line, characterCount);
-            }
-
+            var sb = new StringBuilder();
             bool boxFound = false;
-            for (int i = 0; i < countedChars.Count; i++)
+            for (int i = 0; i < inputLines.Length; i++)
             {
-                if (boxFound) { break; }
-                for (int j = i + 1; j < countedChars.Count; j++)
+                for (int j = i + 1; j < inputLines.Length; j++)
                 {
-                    // compare dictionaries
-                    int differencesInCharacters = 0;
-                    var dictionaryToCompare = countedChars[inputLines[j]];
-                    foreach (var kvp in countedChars[inputLines[i]])
+                    int positionalDifferences = 0;
+                    sb.Clear();
+                    for (int k = 0; k < inputLines[i].Length; k++)
                     {
-                        if (!dictionaryToCompare.ContainsKey(kvp.Key) || dictionaryToCompare[kvp.Key] != kvp.Value)
-                        {
-                            differencesInCharacters++;
-                        }
-                        if (differencesInCharacters > 1) { break; }
+                        if (inputLines[i][k] != inputLines[j][k]) { positionalDifferences++; }
+                        else { sb.Append(inputLines[i][k]); }
+                        if (positionalDifferences > 1) { break; }
                     }
-                    // potential candidates
-                    if (differencesInCharacters == 1)
+                    if (positionalDifferences == 1)
                     {
-                        int positionalDifference = 0;
-                        string candidate1 = inputLines[i];
-                        string candidate2 = inputLines[j];
-                        var sb = new StringBuilder();
-                        for (int k = 0; k < candidate1.Length; k++) {
-                            if (candidate1[k] != candidate2[k]) { positionalDifference++; }
-                            else { sb.Append(candidate1[k]); }
-                        }
-                        if (positionalDifference == 1) {
-                            Console.WriteLine($"Day02 part2 answer: {sb.ToString()}");
-                            boxFound = true;
-                        }
-                        break;
-
+                        Console.WriteLine($"Day02 part2 answer: {sb.ToString()}");
                     }
                 }
+                if (boxFound) { break; }
             }
+
+            //first try
+            //var countedChars = new Dictionary<string, Dictionary<char, int>>();
+            //foreach (string line in inputLines)
+            //{
+            //    var characterCount = new Dictionary<char, int>();
+            //    for (int i = 0; i < line.Length; i++)
+            //    {
+            //        char curChar = line[i];
+            //        if (characterCount.ContainsKey(curChar)) { characterCount[curChar]++; }
+            //        else { characterCount.Add(curChar, 1); }
+            //    }
+            //    countedChars.Add(line, characterCount);
+            //}
+
+            //bool boxFound = false;
+            //for (int i = 0; i < countedChars.Count; i++)
+            //{
+            //    if (boxFound) { break; }
+            //    for (int j = i + 1; j < countedChars.Count; j++)
+            //    {
+            //        // compare dictionaries
+            //        int differencesInCharacters = 0;
+            //        var dictionaryToCompare = countedChars[inputLines[j]];
+            //        foreach (var kvp in countedChars[inputLines[i]])
+            //        {
+            //            if (!dictionaryToCompare.ContainsKey(kvp.Key) || dictionaryToCompare[kvp.Key] != kvp.Value)
+            //            {
+            //                differencesInCharacters++;
+            //            }
+            //            if (differencesInCharacters > 1) { break; }
+            //        }
+            //        // potential candidates
+            //        if (differencesInCharacters == 1)
+            //        {
+            //            int positionalDifference = 0;
+            //            string candidate1 = inputLines[i];
+            //            string candidate2 = inputLines[j];
+            //            var sb = new StringBuilder();
+            //            for (int k = 0; k < candidate1.Length; k++) {
+            //                if (candidate1[k] != candidate2[k]) { positionalDifference++; }
+            //                else { sb.Append(candidate1[k]); }
+            //            }
+            //            if (positionalDifference == 1) {
+            //                Console.WriteLine($"Day02 part2 answer: {sb.ToString()}");
+            //                boxFound = true;
+            //            }
+            //            break;
+
+            //        }
+            //    }
+            //}
         }
 
         public readonly static string input = @"dghfbsyiznoumojleevappwqtr
