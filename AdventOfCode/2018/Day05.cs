@@ -7,61 +7,60 @@ namespace AdventOfCode._2018
     class Day05
     {
         public void Solve() {
-            string polymer = input;
-            bool reactive = true;
-            while (reactive) {
+            string polymer = input ;
+
+            // part 01
+            Console.WriteLine($"Day05 part1 answer: {ReactPolymer(polymer).Length}");
+
+            // part 02
+            string improvedPolymer;
+            int shortestReactedPolymer = polymer.Length;
+            for (int i = 'A'; i <= 'Z'; i++) {
+                var sb = new StringBuilder();
+                foreach (char c in polymer) {
+                    if (c == i || c == (i + 32)) { continue; }
+                    sb.Append(c);
+                }
+                var tmp = sb.ToString();
+                improvedPolymer = ReactPolymer(tmp);
+                if (improvedPolymer.Length < shortestReactedPolymer) {
+                    shortestReactedPolymer = improvedPolymer.Length;
+                }
+            }
+            Console.WriteLine($"Day05 part2 answer: {shortestReactedPolymer}");
+        }
+
+        public string ReactPolymer(string polymer) {
+            while (true)
+            {
                 var reactedChars = new bool[polymer.Length];
                 var sb = new StringBuilder();
-                for (int i = 1; i < polymer.Length; i++) {
-                    if (reactedChars[i - 1] || reactedChars[i]) { continue; } // already reacted
+                for (int i = 1; i < polymer.Length; i++)
+                {
+                    // already reacted
+                    if (reactedChars[i - 1] || reactedChars[i]) { continue; }
                     // look back
-                    if (Math.Abs(polymer[i - 1] - polymer[i]) == 32) {
+                    if (Math.Abs(polymer[i - 1] - polymer[i]) == 32)
+                    {
                         reactedChars[i - 1] = true; reactedChars[i] = true;
                         continue;
                     }
                     // look forward
-                    if ((i + 1 < polymer.Length) && Math.Abs(polymer[i + 1] - polymer[i]) == 32) {
+                    if ((i + 1 < polymer.Length) && Math.Abs(polymer[i + 1] - polymer[i]) == 32)
+                    {
                         reactedChars[i] = true; reactedChars[i + 1] = true;
                     }
                 }
 
-                for (int i = 0; i < polymer.Length; i++) {
+                for (int i = 0; i < polymer.Length; i++)
+                {
                     if (!reactedChars[i]) { sb.Append(polymer[i]); }
                 }
                 string updatedPolymer = sb.ToString();
                 if (updatedPolymer == polymer) { break; }
                 polymer = updatedPolymer;
-                // failed try1
-                //bool isReactive = false;
-                //char lastReacted = ' ';
-                //var sb = new StringBuilder();
-                //for (int i = 0; i < polymer.Length; i++) {
-                //    // look back
-                //    if ((i - 1 > 0 && Math.Abs(polymer[i - 1] - polymer[i]) == 32) 
-                //        && (lastReacted!= polymer[i - 1] || lastReacted != polymer[i])) {
-                //        isReactive = true;
-                //        lastReacted = polymer[i];
-                //        i++;
-                //        continue;
-                //    }
-                //    // look forward
-                //    if ((i + 1 < polymer.Length && Math.Abs(polymer[i + 1] - polymer[i]) == 32)
-                //        && (lastReacted != polymer[i + 1] || lastReacted != polymer[i])) {
-                //        isReactive = true;
-                //        lastReacted = polymer[i];
-                //        i++;
-                //        continue;
-                //    }
-                //    // no matches, add this char to the new polymer
-                //    sb.Append(polymer[i]);
-
-                //}
-                //reactive = isReactive;
-                //polymer = sb.ToString();
             }
-
-
-            Console.WriteLine($"Day05 part1 answer: {polymer} - length: {polymer.Length}");
+            return polymer;
         }
 
         public string testinput = @"dabAcCaCBAcCcaDA"; // = aCd
