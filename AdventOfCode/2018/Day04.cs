@@ -12,6 +12,7 @@ namespace AdventOfCode._2018
 
             // string sorting is ascending a-z and 1-9, the timestamp will make sure it gets sorted the right way
             Array.Sort(lines);
+
             Dictionary<int, int> guardsTotalSleepingMinutes = new Dictionary<int, int>();
             Dictionary<int, int[]> guardsSleepingMinutes = new Dictionary<int, int[]>();
             int currentGuardId = -1, sleepStartsAt = -1;
