@@ -24,8 +24,7 @@ namespace AdventOfCode._2018
                     if (c == i || c == (i + 32)) { continue; }
                     sb.Append(c);
                 }
-                var tmp = sb.ToString();
-                improvedPolymer = ReactPolymer(tmp);
+                improvedPolymer = ReactPolymer(sb.ToString());
                 if (improvedPolymer.Length < shortestReactedPolymer) {
                     shortestReactedPolymer = improvedPolymer.Length;
                 }
@@ -34,6 +33,19 @@ namespace AdventOfCode._2018
         }
 
         public string ReactPolymer(string polymer) {
+            var units = new Stack<char>();
+            for (int i = 0; i < polymer.Length; i++) {
+                if (units.Count == 0) { units.Push(polymer[i]); continue; }
+                char lastUnit = units.Peek();
+                if ((lastUnit ^ polymer[i]) == 32) {
+                    units.Pop();
+                    continue;
+                }
+                units.Push(polymer[i]);
+            }
+            return new string(units.ToArray());
+        }
+        public string ReactPolymerNaive(string polymer) {
             while (true)
             {
                 var reactedChars = new bool[polymer.Length];
