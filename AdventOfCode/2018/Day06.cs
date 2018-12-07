@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace AdventOfCode._2018
 {
@@ -10,13 +11,14 @@ namespace AdventOfCode._2018
         {
             // process input
             int coordinateId = 1;
-            int offset = 5;
+            int offset = 0;
             var infinites = new HashSet<int>();
             var areas = new Dictionary<int, int>(); // (coordinateId, area)
             var minimumGridSize = (horizontal: 0, vertical: 0);
             var coordinates = new Dictionary<int, (int X, int Y)>();
+            int gridHorizontal = int.MaxValue, gridVertical = int.MaxValue;
 
-            foreach (string line in testinput.Split(Environment.NewLine))
+            foreach (string line in input.Split(Environment.NewLine))
             {
                 int[] coordinate = Array.ConvertAll(line.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries), int.Parse);
                 areas.Add(coordinateId, 0);
@@ -25,22 +27,71 @@ namespace AdventOfCode._2018
                 if (minimumGridSize.vertical < coordinate[1]) { minimumGridSize.vertical = coordinate[1]; }
                 coordinateId++;
             }
+            gridHorizontal = 2 * offset + minimumGridSize.horizontal;
+            gridVertical = 2 * offset + minimumGridSize.vertical;
 
             // initialise Grid dynamically based on the size of input
             var valGrid = new Dictionary<(int X, int Y), int>(); // shortest distance, from any point
             var idGrid = new Dictionary<(int X, int Y), HashSet<int>>(); // all points that have this shorted distance
-            var queue = new Queue<(int Id, int X, int Y, int Distance)>();
-            foreach (var coor in coordinates) { queue.Enqueue((coor.Key, coor.Value.X + offset, coor.Value.Y+offset, 0)); }
-            while (queue.Count > 0) {
+            var queue = new Queue<(int X, int Y, int Id, int Distance)>();
+            var edgeIds = new HashSet<int>();
+            foreach (var coor in coordinates) { queue.Enqueue((X: coor.Value.X + offset, Y: coor.Value.Y + offset, Id: coor.Key, Distance: 0)); }
+            while (queue.Count > 0)
+            {
                 var point = queue.Dequeue();
-                if (valGrid[(point.X, point.Y)] > point.Distance) { continue; }
+                point.Distance++; // increase distance
+
+                // check grid if they are initialised
+                if (!valGrid.ContainsKey((point.X, point.Y))) { valGrid.Add((point.X, point.Y), int.MaxValue); }
+                if (!idGrid.ContainsKey((point.X, point.Y))) { idGrid.Add((point.X, point.Y), new HashSet<int>()); }
+
+                // case 1: another point is closer by OR it is already  claimed by this ID
+                if (valGrid[(point.X, point.Y)] < point.Distance || idGrid[(point.X, point.Y)].Contains(point.Id)) { continue; }
+
+                // case 2: claim this tile
+                valGrid[(point.X, point.Y)] = point.Distance;
+                idGrid[(point.X, point.Y)].Add(point.Id);
+
+                // propagate and enqueue neighbours
+                if (point.X > 0) { queue.Enqueue((X: point.X - 1, Y: point.Y, Id: point.Id, Distance: point.Distance)); }
+                if (point.X < gridHorizontal - 1) { queue.Enqueue((X: point.X + 1, Y: point.Y, Id: point.Id, Distance: point.Distance)); }
+                if (point.Y > 0) { queue.Enqueue((X: point.X, Y: point.Y - 1, Id: point.Id, Distance: point.Distance)); }
+                if (point.Y < gridVertical - 1) { queue.Enqueue((X: point.X, Y: point.Y + 1, Id: point.Id, Distance: point.Distance)); }
+            }
+
+            // PRINT
+            //for (int i = 0; i < gridHorizontal; i++) {
+            //    var sb = new StringBuilder();
+            //    for (int j = 0; j < gridVertical; j++) {
+            //        if (idGrid[(i, j)].Count == 1) { sb.Append(idGrid[(i, j)].First()); }
+            //        else { sb.Append("X"); }
+            //    }
+            //    Console.WriteLine($"Grid line i: { sb.ToString() }");
+            //}
+            
+            for (int i = 0; i < gridHorizontal - 1; i++) {
+                if (idGrid[(i, 0)].Count == 1) { edgeIds.Add(idGrid[(i,0)].First()); }
+                if (idGrid[(i, gridVertical-1)].Count == 1) { edgeIds.Add(idGrid[(i, gridVertical-1)].First()); }
+            }
+
+            for (int i = 0; i < gridVertical - 1; i++)
+            {
+                if (idGrid[(0, i)].Count == 1) { edgeIds.Add(idGrid[(0, i)].First()); }
+                if (idGrid[(gridHorizontal-1, i)].Count == 1) { edgeIds.Add(idGrid[(gridHorizontal-1, i)].First()); }
+            }
+
+            // count the areas
+            foreach (var kvp in idGrid)
+            {
+                if (kvp.Value.Count == 1 && !edgeIds.Contains(kvp.Value.First()))
+                {
+                    areas[kvp.Value.First()]++;
+                }
 
             }
 
-
-
-            
-            Console.WriteLine($"Day06 part1 answer: { areas.Where(kvp => !infinites.Contains(kvp.Key)).Max(kvp => kvp.Value) }");
+            Console.WriteLine($"Day06 part1 answer: { areas.Max(kvp => kvp.Value) }");
+            // not 7976
             Console.WriteLine($"Day06 part2 answer: ");
         }
 
