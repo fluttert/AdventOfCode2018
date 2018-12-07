@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace AdventOfCode._2018
 {
@@ -8,20 +9,23 @@ namespace AdventOfCode._2018
     {
         public void Solve()
         {
-            var dependencies = new List<(string pre, string post)>();
-
-            //input.Split(Environment.NewLine).ForEach(x.Split(' ') => dependencies.Add((x.Words().ElementAt(1), x.Words().ElementAt(7))));
+            var routes = new List<(string from, string to)>();
+            var allPoints = new HashSet<string>();
 
             foreach (string line in input.Split(Environment.NewLine))
             {
                 string[] words = line.Split(' ');
                 string from = words[1];
                 string to = words[7];
-                dependencies.Add((from,to));
+                routes.Add((from,to));
+                allPoints.Add(from); allPoints.Add(to);
+            }
+            var sortedPoints = allPoints.OrderBy(x => x).ToList();
+            var sb = new StringBuilder();
+            while (sortedPoints.Count > 0) {
 
             }
 
-            var allSteps = dependencies.Select(x => x.pre).Concat(dependencies.Select(x => x.post)).Distinct().OrderBy(x => x).ToList();
             var result = string.Empty;
 
             while (allSteps.Any())
