@@ -17,48 +17,26 @@ namespace AdventOfCode._2018
                 string[] words = line.Split(' ');
                 string from = words[1];
                 string to = words[7];
-                routes.Add((from,to));
+                routes.Add((from, to));
                 allPoints.Add(from); allPoints.Add(to);
             }
             var sortedPoints = allPoints.OrderBy(x => x).ToList();
             var sb = new StringBuilder();
-            while (sortedPoints.Count > 0) {
-
-            }
-
-            var result = string.Empty;
-
-            while (allSteps.Any())
+            while (sortedPoints.Count > 0)
             {
-                var valid = allSteps.Where(s => !dependencies.Any(d => d.post == s)).First();
+                // get the first character that has ZERO dependencies 
+                string curChar = sortedPoints.Where(r => routes.Count(d => d.to == r) == 0).First();
 
-                result += valid;
+                sb.Append(curChar);
+                sortedPoints.Remove(curChar);
 
-                allSteps.Remove(valid);
-                dependencies.RemoveAll(d => d.pre == valid);
+                // remove this dependency for all steps that needed this one
+                routes.RemoveAll(r => r.from == curChar); 
             }
 
-            Console.WriteLine($"Day07 part1 answer:{result}"); 
+            Console.WriteLine($"Day07 part1 answer:{sb.ToString()}");
 
-
-            //// parse input
-            //var direction = new Dictionary<char, List<char>>();
-            //var roots = new HashSet<char>();
-            //var nonRoots = new HashSet<char>();
-            //foreach (string line in input.Split(Environment.NewLine))
-            //{
-            //    string[] words = line.Split(' ');
-            //    char from = words[1][0];
-            //    char to = words[7][0];
-            //    if (!direction.ContainsKey(from)) { direction.Add(from, new List<char>() { to }); }
-            //    else { direction[from].Add(to); }
-            //    roots.Add(from);
-            //    nonRoots.Add(to);
-            //}
-            //var root = roots.Where(x => !nonRoots.Contains(x)).ToList();
-
-            // part 01
-            Console.WriteLine($"Day07 part1 answer:");
+            Console.WriteLine($"Day07 part2 answer:");
         }
 
         public string input = @"Step J must be finished before step K can begin.
