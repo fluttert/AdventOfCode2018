@@ -12,8 +12,11 @@ namespace AdventOfCode
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            new Day06().Solve();
-            Console.WriteLine($"Day05 solved in {stopwatch.ElapsedMilliseconds}ms");
+            new Day07().Solve();
+            Console.WriteLine($"Day07 solved in {stopwatch.ElapsedMilliseconds}ms");
+
+            //new Day06().Solve();
+            //Console.WriteLine($"Day06 solved in {stopwatch.ElapsedMilliseconds}ms");
 
             //new Day05().Solve();
             //Console.WriteLine($"Day05 solved in {stopwatch.ElapsedMilliseconds}ms");
