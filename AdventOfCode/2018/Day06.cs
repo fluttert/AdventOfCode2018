@@ -7,7 +7,49 @@ namespace AdventOfCode._2018
 {
     internal class Day06
     {
-        public void Solve()
+
+        public void Solve() {
+            var lines = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            var points = new List<(int X, int Y)>();
+            var area = new Dictionary<int, int>(); // area matrix
+
+            // add all points
+            for(int i = 0; i < lines.Length; i++) { 
+                int[] coordinates = Array.ConvertAll(lines[i].Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries), int.Parse);
+                points.Add((X: coordinates[0], Y: coordinates[1]));
+                area.Add(i, 0);
+            }
+
+            // determine for each point on the grid which is the nearest point
+            int horizontal = points.Max(kvp => kvp.X), vertical = points.Max(kvp => kvp.Y);
+            var edges = new HashSet<int>();
+            for (int i = 0; i <= horizontal; i++)
+            {
+                for (int j = 0; j <= vertical; j++)
+                {
+                    int minimumDistance = int.MaxValue;
+                    int minimumId = -1;
+                    for (int k = 0; k < points.Count; k++)
+                    {
+                        int distance = Math.Abs(i-points[k].X) + Math.Abs(j-points[k].Y);
+                        if (distance > minimumDistance) { continue; }
+                        if (distance == minimumDistance && minimumId!=-1) { area[minimumId]--;minimumId = -1; continue; }
+                        if (distance < minimumDistance) {
+                            if (minimumId != -1) { area[minimumId]--; }
+                            minimumId = k;
+                            minimumDistance = distance;
+                            area[k]++;
+                        }
+                    }
+                    // is edge?
+                    if (minimumId != -1 && (i == 0 || j == 0 || i == horizontal - 1 || j == vertical - 1)) { edges.Add(minimumId); }
+                }
+            }
+            Console.WriteLine($"Day06 Answer Part 1 is {area.Where(kvp => !edges.Contains(kvp.Key)).Max(x => x.Value)}");
+
+        }
+
+        public void SolvePart01Naive()
         {
             // process input
             int coordinateId = 1;
@@ -58,16 +100,6 @@ namespace AdventOfCode._2018
                 if (point.Y > 0) { queue.Enqueue((X: point.X, Y: point.Y - 1, Id: point.Id, Distance: point.Distance)); }
                 if (point.Y < gridVertical - 1) { queue.Enqueue((X: point.X, Y: point.Y + 1, Id: point.Id, Distance: point.Distance)); }
             }
-
-            // PRINT
-            //for (int i = 0; i < gridHorizontal; i++) {
-            //    var sb = new StringBuilder();
-            //    for (int j = 0; j < gridVertical; j++) {
-            //        if (idGrid[(i, j)].Count == 1) { sb.Append(idGrid[(i, j)].First()); }
-            //        else { sb.Append("X"); }
-            //    }
-            //    Console.WriteLine($"Grid line i: { sb.ToString() }");
-            //}
             
             for (int i = 0; i < gridHorizontal - 1; i++) {
                 if (idGrid[(i, 0)].Count == 1) { edgeIds.Add(idGrid[(i,0)].First()); }
