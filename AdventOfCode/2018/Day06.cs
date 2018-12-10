@@ -23,15 +23,18 @@ namespace AdventOfCode._2018
             // determine for each point on the grid which is the nearest point
             int horizontal = points.Max(kvp => kvp.X), vertical = points.Max(kvp => kvp.Y);
             var edges = new HashSet<int>();
+            int regionTilesLessThen10K = 0;
             for (int i = 0; i <= horizontal; i++)
             {
                 for (int j = 0; j <= vertical; j++)
                 {
                     int minimumDistance = int.MaxValue;
                     int minimumId = -1;
+                    int sumDistance = 0;
                     for (int k = 0; k < points.Count; k++)
                     {
                         int distance = Math.Abs(i-points[k].X) + Math.Abs(j-points[k].Y);
+                        sumDistance += distance;
                         if (distance > minimumDistance) { continue; }
                         if (distance == minimumDistance && minimumId!=-1) { area[minimumId]--;minimumId = -1; continue; }
                         if (distance < minimumDistance) {
@@ -43,9 +46,12 @@ namespace AdventOfCode._2018
                     }
                     // is edge?
                     if (minimumId != -1 && (i == 0 || j == 0 || i == horizontal - 1 || j == vertical - 1)) { edges.Add(minimumId); }
+                    if (sumDistance < 10000) { regionTilesLessThen10K++; }
                 }
             }
+
             Console.WriteLine($"Day06 Answer Part 1 is {area.Where(kvp => !edges.Contains(kvp.Key)).Max(x => x.Value)}");
+            Console.WriteLine($"Day06 Answer Part 2 is {regionTilesLessThen10K}");
 
         }
 
