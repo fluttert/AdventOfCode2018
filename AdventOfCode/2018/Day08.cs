@@ -1,31 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace AdventOfCode._2018
 {
-    class Day08
+    internal class Day08
     {
-        public void Solve() {
+        public void Solve()
+        {
+            SolvePart01();
+            SolvePart02();
+        }
+
+        public void SolvePart01()
+        {
             var numbers = Array.ConvertAll(input.Split(' '), int.Parse);
             var stack = new Stack<(int ChildNodes, int MetadataEntries)>();
             int pointer = 0, sumMetadata = 0;
             bool readMeta = false;
 
             // init tree with rootnode, take it from there
-            stack.Push((ChildNodes: numbers[0], MetadataEntries: numbers[1] ));
+            stack.Push((ChildNodes: numbers[0], MetadataEntries: numbers[1]));
             pointer = 2;
-            while (pointer < numbers.Length) {
+            while (pointer < numbers.Length)
+            {
                 var item = stack.Peek();
                 // if we have childnodes -> add child to stack, lessen the current value
-                if (item.ChildNodes > 0) {
+                if (item.ChildNodes > 0)
+                {
                     item = stack.Pop();
                     stack.Push((ChildNodes: item.ChildNodes - 1, MetadataEntries: item.MetadataEntries));
                     stack.Push((ChildNodes: numbers[pointer], MetadataEntries: numbers[pointer + 1]));
                     pointer += 2;
                     continue;
                 }
-                if (item.ChildNodes == 0) {
+                if (item.ChildNodes == 0)
+                {
                     for (int i = 0; i < item.MetadataEntries; i++)
                     {
                         sumMetadata += numbers[pointer + i];
@@ -33,9 +42,83 @@ namespace AdventOfCode._2018
                     pointer += item.MetadataEntries;
                     stack.Pop(); // remove from stack;
                 }
-               
             }
             Console.WriteLine($"Day08 part1 answer:{sumMetadata}");
+        }
+
+        public void SolvePart02()
+        {
+            var numbers = Array.ConvertAll(input.Split(' '), int.Parse);
+            var stack = new Stack<(int ChildNodes, int ChildNodesToProcess, int MetadataEntries, List<int> ChildSums)>();
+            int pointer = 0, rootNodeValue = 0, lastChildNodeValue = 0;
+
+
+            // init tree with rootnode, take it from there
+            stack.Push((ChildNodes: numbers[0], ChildNodesToProcess: numbers[0], MetadataEntries: numbers[1], ChildSums: new List<int>()));
+            pointer = 2;
+            while (pointer < numbers.Length)
+            {
+                var item = stack.Peek();
+                // base case: no child nodes just meta data = sum and return
+                if (item.ChildNodes == 0)
+                {
+                    lastChildNodeValue = 0;
+                    for (int i = 0; i < item.MetadataEntries; i++)
+                    {
+                        lastChildNodeValue += numbers[pointer + i];
+                    }
+                    pointer += item.MetadataEntries;
+                    stack.Pop(); // remove from stack;
+                    continue;
+                }
+
+                // case 1: We have just discovered this node, and did not yet process any children
+                if (item.ChildNodes > 0 && item.ChildNodes == item.ChildNodesToProcess)
+                {
+                    // remove node, decrease childrentoprocess and add first childnode
+                    item = stack.Pop();
+                    stack.Push((ChildNodes: item.ChildNodes, ChildNodesToProcess: item.ChildNodesToProcess - 1, MetadataEntries: item.MetadataEntries, ChildSums: item.ChildSums));
+                    stack.Push((ChildNodes: numbers[pointer], ChildNodesToProcess: numbers[pointer], MetadataEntries: numbers[pointer + 1], ChildSums: new List<int>()));
+                    pointer += 2;
+                    continue;
+                }
+                // case 2: A child is processed, but not all of them
+                if (item.ChildNodes > 0 && item.ChildNodesToProcess>0 && item.ChildNodes != item.ChildNodesToProcess)
+                {
+                    // remove node, decrease childrentoprocess, update childsums and add next childnode
+                    item = stack.Pop();
+                    var updatedSums = item.ChildSums;
+                    updatedSums.Add(lastChildNodeValue);
+                    stack.Push((ChildNodes: item.ChildNodes, ChildNodesToProcess: item.ChildNodesToProcess - 1, MetadataEntries: item.MetadataEntries, ChildSums: updatedSums));
+                    stack.Push((ChildNodes: numbers[pointer], ChildNodesToProcess: numbers[pointer], MetadataEntries: numbers[pointer + 1], ChildSums: new List<int>()));
+                    pointer += 2;
+                    continue;
+                }
+                // case 3: A child is processed, and none are left -> Meta data update!
+                if (item.ChildNodes > 0 && item.ChildNodesToProcess ==0)
+                {
+                    // remove node and update the childsums
+                    item = stack.Peek();
+                    var updatedSums = item.ChildSums;
+                    updatedSums.Add(lastChildNodeValue);
+
+                    lastChildNodeValue = 0;
+                    // read meta data
+                    for (int i = 0; i < item.MetadataEntries; i++)
+                    {
+                        int index = numbers[pointer + i];
+                        // ignore zero and no child
+                        if (index == 0 || index > updatedSums.Count) { continue; }
+                        lastChildNodeValue += updatedSums[index-1];
+                    }
+                    pointer += item.MetadataEntries;
+                    stack.Pop(); // remove from stack;
+                    rootNodeValue = lastChildNodeValue;
+                    continue;
+                }
+
+            }
+            Console.WriteLine($"Day08 part2 answer:{rootNodeValue}");
         }
 
         public string testinput = @"2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2";
