@@ -33,9 +33,11 @@ namespace AdventOfCode._2018
 
             // determine largest fuel-square
             var results = new Dictionary<int, (int X, int Y, int largestPower)>();
+            for (int i = 1; i < gridSize; i++){
+                results.Add(i, (X: 0, Y: 0, largestPower: int.MinValue));
+            }
             Parallel.For(1, gridSize, squareSize =>
             {
-                results.Add(squareSize, (X: 0, Y: 0, largestPower: int.MinValue));
                 for (int i = 0; i < gridSize - squareSize + 1; i++)
                 { // COLUMN
                     for (int j = 0; j < gridSize - squareSize + 1; j++)
