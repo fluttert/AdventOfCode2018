@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AdventOfCode._2018
 {
@@ -29,27 +32,54 @@ namespace AdventOfCode._2018
             }
 
             // determine largest fuel-square
-            int largestPower = int.MinValue;
-            var topLeft = (X: 0, Y: 0);
-            for (int i = 0; i < gridSize - 2; i++)
-            { // COLUMN
-                for (int j = 0; j < gridSize - 2; j++)
-                { // ROW
-                    int totalPower = grid[j][i] + grid[j + 1][i] + grid[j + 2][i];
-                    totalPower += grid[j][i + 1] + grid[j + 1][i + 1] + grid[j + 2][i + 1];
-                    totalPower += grid[j][i + 2] + grid[j + 2][i + 1] + grid[j + 2][i + 2];
+            var results = new Dictionary<int, (int X, int Y, int largestPower)>();
+            Parallel.For(1, gridSize, squareSize =>
+            {
+                results.Add(squareSize, (X: 0, Y: 0, largestPower: int.MinValue));
+                for (int i = 0; i < gridSize - squareSize + 1; i++)
+                { // COLUMN
+                    for (int j = 0; j < gridSize - squareSize + 1; j++)
+                    { // ROW
+                        int totalPower = 0;
+                        for (int k = 0; k < squareSize; k++)
+                        {
+                            for (int l = 0; l < squareSize; l++)
+                            {
+                                totalPower += grid[j + k][i + l];
+                            }
+                        }
 
-                    if (largestPower < totalPower)
-                    {
-                        largestPower = totalPower;
-                        topLeft = (X: j, Y: i);
+                        if (results[squareSize].largestPower < totalPower)
+                        {
+                            results[squareSize] = (X: j, Y: i, totalPower);
+                        }
                     }
-                    //sb.Append($"({j},{i}) ");
                 }
-                //Console.WriteLine(sb.ToString());
-            }
+                Console.WriteLine($"Largest power for squaresize {squareSize} = {results[squareSize].largestPower})");
+            });
 
-            Console.WriteLine($"Day11 part1 answer: ({topLeft.X},{topLeft.Y})");
+            Console.WriteLine($"Day11 part1 answer: ({results[3].X},{results[3].Y}) - power: {results[3].largestPower} (gridsize 3)");
+            var fullestSquare = results.OrderByDescending(kvp => kvp.Value.largestPower).First();
+            Console.WriteLine($"Day11 part2 answer: ({fullestSquare.Value.X},{fullestSquare.Value.Y},{fullestSquare.Key}) - power: {fullestSquare.Value.largestPower}");
+            // initial solution
+            //for (int i = 0; i < gridSize - 2; i++)
+            //{ // COLUMN
+            //    for (int j = 0; j < gridSize - 2; j++)
+            //    { // ROW
+            //        int totalPower = grid[j][i] + grid[j + 1][i] + grid[j + 2][i];
+            //        totalPower += grid[j][i + 1] + grid[j + 1][i + 1] + grid[j + 2][i + 1];
+            //        totalPower += grid[j][i + 2] + grid[j + 2][i + 1] + grid[j + 2][i + 2];
+
+            //        if (largestPower < totalPower)
+            //        {
+            //            largestPower = totalPower;
+            //            topLeft3Square = (X: j, Y: i);
+            //        }
+            //        //sb.Append($"({j},{i}) ");
+            //    }
+            //    //Console.WriteLine(sb.ToString());
+            //}
+            //Console.WriteLine($"Day11 part1 answer: ({topLeft3Square.X},{topLeft3Square.Y})");
         }
 
         public string input = "5235";
