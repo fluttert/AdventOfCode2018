@@ -24,7 +24,7 @@ namespace AdventOfCode._2018
             // iterations
             string currentState = new string(state);
             int totalPots = 0;
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < 200; i++) {
                 for (int j = 0; j< state.Length; j++) { state[j] = '.'; };
                 for (int j = 0; j < currentState.Length - 4; j++) {
                     var curPattern = currentState.Substring(j, 5);

@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AdventOfCode._2018
 {
     internal class Day06
     {
-
-        public void Solve() {
+        public void Solve()
+        {
             var lines = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
             var points = new List<(int X, int Y)>();
             var area = new Dictionary<int, int>(); // area matrix
 
             // add all points
-            for(int i = 0; i < lines.Length; i++) { 
+            for (int i = 0; i < lines.Length; i++)
+            {
                 int[] coordinates = Array.ConvertAll(lines[i].Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries), int.Parse);
                 points.Add((X: coordinates[0], Y: coordinates[1]));
                 area.Add(i, 0);
@@ -33,11 +33,12 @@ namespace AdventOfCode._2018
                     int sumDistance = 0;
                     for (int k = 0; k < points.Count; k++)
                     {
-                        int distance = Math.Abs(i-points[k].X) + Math.Abs(j-points[k].Y);
+                        int distance = Math.Abs(i - points[k].X) + Math.Abs(j - points[k].Y);
                         sumDistance += distance;
                         if (distance > minimumDistance) { continue; }
-                        if (distance == minimumDistance && minimumId!=-1) { area[minimumId]--;minimumId = -1; continue; }
-                        if (distance < minimumDistance) {
+                        if (distance == minimumDistance && minimumId != -1) { area[minimumId]--; minimumId = -1; continue; }
+                        if (distance < minimumDistance)
+                        {
                             if (minimumId != -1) { area[minimumId]--; }
                             minimumId = k;
                             minimumDistance = distance;
@@ -52,7 +53,6 @@ namespace AdventOfCode._2018
 
             Console.WriteLine($"Day06 Answer Part 1 is {area.Where(kvp => !edges.Contains(kvp.Key)).Max(x => x.Value)}");
             Console.WriteLine($"Day06 Answer Part 2 is {regionTilesLessThen10K}");
-
         }
 
         public void SolvePart01Naive()
@@ -106,16 +106,17 @@ namespace AdventOfCode._2018
                 if (point.Y > 0) { queue.Enqueue((X: point.X, Y: point.Y - 1, Id: point.Id, Distance: point.Distance)); }
                 if (point.Y < gridVertical - 1) { queue.Enqueue((X: point.X, Y: point.Y + 1, Id: point.Id, Distance: point.Distance)); }
             }
-            
-            for (int i = 0; i < gridHorizontal - 1; i++) {
-                if (idGrid[(i, 0)].Count == 1) { edgeIds.Add(idGrid[(i,0)].First()); }
-                if (idGrid[(i, gridVertical-1)].Count == 1) { edgeIds.Add(idGrid[(i, gridVertical-1)].First()); }
+
+            for (int i = 0; i < gridHorizontal - 1; i++)
+            {
+                if (idGrid[(i, 0)].Count == 1) { edgeIds.Add(idGrid[(i, 0)].First()); }
+                if (idGrid[(i, gridVertical - 1)].Count == 1) { edgeIds.Add(idGrid[(i, gridVertical - 1)].First()); }
             }
 
             for (int i = 0; i < gridVertical - 1; i++)
             {
                 if (idGrid[(0, i)].Count == 1) { edgeIds.Add(idGrid[(0, i)].First()); }
-                if (idGrid[(gridHorizontal-1, i)].Count == 1) { edgeIds.Add(idGrid[(gridHorizontal-1, i)].First()); }
+                if (idGrid[(gridHorizontal - 1, i)].Count == 1) { edgeIds.Add(idGrid[(gridHorizontal - 1, i)].First()); }
             }
 
             // count the areas
@@ -125,7 +126,6 @@ namespace AdventOfCode._2018
                 {
                     areas[kvp.Value.First()]++;
                 }
-
             }
 
             Console.WriteLine($"Day06 part1 answer: { areas.Max(kvp => kvp.Value) }");
