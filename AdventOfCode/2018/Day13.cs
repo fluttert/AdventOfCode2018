@@ -23,9 +23,9 @@ namespace AdventOfCode._2018
 
         public void Solve()
         {
-            var lines = testinput3.Split(Environment.NewLine);
+            var lines = input.Split(Environment.NewLine);
             var grid = new char[lines.Length][];
-            var carts = new List<(int X, int Y, Dir direction, Turn turn)>();
+            var carts = new List<(int X, int Y, Dir direction, Turn turn, bool deleted)>();
             for (int i = 0; i < lines.Length; i++)
             {
                 grid[i] = new char[lines[i].Length];
@@ -37,12 +37,12 @@ namespace AdventOfCode._2018
                     if (curChar == '^' || curChar == 'v')
                     {
                         grid[i][j] = '|';
-                        carts.Add((i, j, curChar == '^' ? Dir.NORTH : Dir.SOUTH, Turn.LEFT));
+                        carts.Add((i, j, curChar == '^' ? Dir.NORTH : Dir.SOUTH, Turn.LEFT, false));
                     }
                     if (curChar == '>' || curChar == '<')
                     {
                         grid[i][j] = '-';
-                        carts.Add((i, j, curChar == '>' ? Dir.EAST : Dir.WEST, Turn.LEFT));
+                        carts.Add((i, j, curChar == '>' ? Dir.EAST : Dir.WEST, Turn.LEFT, false));
                     }
                 }
             }
@@ -51,9 +51,10 @@ namespace AdventOfCode._2018
             //Console.WriteLine("- start condition");
             //var printGrid = new char[grid.Length][];
             //for (int i = 0; i < printGrid.Length; i++) { printGrid[i] = new string(grid[i]).ToCharArray(); }
-            //for (int i = 0; i < carts.Count; i++) { var cart = carts[i]; printGrid[cart.X][cart.Y] = '*'; }
+            //for (int i = 0; i < carts.Count; i++) { var cart = carts[i]; if (cart.deleted) { continue; } printGrid[cart.X][cart.Y] = '*'; }
             //for (int i = 0; i < printGrid.Length; i++) { Console.WriteLine($"{i}" + new string(printGrid[i])); }
             //Console.WriteLine("-");
+            Console.WriteLine($"Total carts found: {carts.Count}");
 
             // roll out the carts
             bool last = false;
@@ -62,13 +63,18 @@ namespace AdventOfCode._2018
             int iteration = 1;
             while (!last)
             {
-                var startingCoordinates = carts.Select(t => (t.X, t.Y)).ToList();
+                var coordinatesToDelete = new List<(int X, int Y)>();
+                var startingCoordinates = carts.Where(t => !t.deleted).Select(t => (t.X, t.Y)).ToList();
                 coordinates = new HashSet<(int, int)>();
 
+                carts = carts.OrderBy(c => c.X).ToList() ;
+
                 // part02
-                if (carts.Count == 1)
+                if (carts.Count(t => !t.deleted) == 1)
                 {
-                    Console.WriteLine($"Last cart starts at: ({carts[0].Y},{carts[0].X}) at iteration: {iteration}");
+                    var lastCart = carts.Where(t => !t.deleted).First();
+                    Console.WriteLine($"Last cart starts at: ({lastCart.Y},{lastCart.X}) at iteration: {iteration}");
+                    // not 70,82
                     last = true;
                     break;
                 }
@@ -78,6 +84,8 @@ namespace AdventOfCode._2018
                 {
                     var cartCopy = carts[i];
                     var cart = carts[i];
+                    if (cart.deleted) { continue; } // ignore deleted carts
+
                     var gridPiece = grid[cart.X][cart.Y];
                     var going = cart.direction;
                     // Go Straight - nothing changes .. dont even do this
@@ -125,10 +133,7 @@ namespace AdventOfCode._2018
                     if (cart.direction == Dir.NORTH || cart.direction == Dir.SOUTH) { cart.X += cart.direction == Dir.NORTH ? -1 : 1; }
                     if (cart.direction == Dir.WEST || cart.direction == Dir.EAST) { cart.Y += cart.direction == Dir.WEST ? -1 : 1; }
 
-                    // update this cart in the list
-                    carts[i] = cart;
-
-                    // collision check
+                    // collision check, they are like -->-<-- or --><--
                     if (coordinates.Contains((cart.X, cart.Y)) || startingCoordinates.Contains((cart.X, cart.Y)))
                     {
                         if (!firstCrash)
@@ -137,23 +142,45 @@ namespace AdventOfCode._2018
                         }
                         Console.WriteLine($"Removed carts on position ({cart.Y},{cart.X}) on iteration {iteration}");
                         firstCrash = true;
+                        cart.deleted = true;
 
-                        // insta-remove the carts
-
-                        coordinates.Remove((cart.X, cart.Y));
-                        carts.RemoveAll(c => c.X == cart.X && c.Y == cart.Y);
-
+                        // delete the original coordinates from cart from the starting position list
                         startingCoordinates.Remove((cartCopy.X, cartCopy.Y));
+
+                        // insert right away
+                        carts[i] = cart;
+                        // collides with an already moved cart, type -->-<--
+
+                        int indexMovedCart = carts.FindIndex(t => t.X == cart.X && t.Y == cart.Y && !t.deleted);
+                        var movedCart = carts[indexMovedCart];
+                        movedCart.deleted = true;
+                        carts[indexMovedCart] = movedCart;
+
+                        // remove the to be collision
+                        if (coordinates.Contains((cart.X, cart.Y)))
+                        {
+                            coordinates.Remove((cart.X, cart.Y));
+                        }
+                        else
+                        {
+                            // collision with non moved cart, type --><--
+                            startingCoordinates.Remove((cart.X, cart.Y));
+                        }
                     }
                     else
                     {
                         coordinates.Add((cart.X, cart.Y));
+                        startingCoordinates.Remove((cartCopy.X, cartCopy.Y));
                     }
+
+                    // UPDATE CARTS!
+                    // update this cart in the list
+                    carts[i] = cart;
 
                     // something wrong -- insane debugging
                     if (cart.X < 0 || cart.X >= grid.Length || cart.Y < 0 || cart.Y >= grid[0].Length)
                     {
-                        Console.WriteLine($"SOMETING TERRIBLE, i am going off the rails at ({cart.X},{cart.Y}) and came from ({cartCopy.X},{cartCopy.Y} ) - Gridsize: {grid.Length} x {grid[0].Length}");
+                        //Console.WriteLine($"SOMETING TERRIBLE, i am going off the rails at ({cart.X},{cart.Y}) and came from ({cartCopy.X},{cartCopy.Y} ) - Gridsize: {grid.Length} x {grid[0].Length}");
                     }
                     if (grid[cart.X][cart.Y] == ' ')
                     {
@@ -161,10 +188,10 @@ namespace AdventOfCode._2018
                     }
                 }
 
-                //// print function after each iteration
-                //var printGrid = new char[grid.Length][];
+                // print function after each iteration
+                // var printGrid = new char[grid.Length][];
                 //for (int i = 0; i < printGrid.Length; i++) { printGrid[i] = new string(grid[i]).ToCharArray(); }
-                //for (int i = 0; i < carts.Count; i++) { var cart = carts[i]; printGrid[cart.X][cart.Y] = '*'; }
+                //for (int i = 0; i < carts.Count; i++) { var cart = carts[i]; if (cart.deleted) { continue; } printGrid[cart.X][cart.Y] = '*'; }
                 //for (int i = 0; i < printGrid.Length; i++) { Console.WriteLine($"{i}" + new string(printGrid[i])); }
                 //Console.WriteLine("-");
                 iteration++;
@@ -179,15 +206,19 @@ v
 ^
 |";
 
-        public string testinput3 = @"/>-<\
-|   |
+        public string testinput4 = @"/>----\
+|>>-+<|
+\->>+</";
+
+        public string testinput = @"/-><\  
+|   |  
 | /<+-\
-| | | v
-\>+</ |
-  |   ^
+| v | |
+\>+</ v
+  ^   ^
   \<->/ ";
 
-        public string testinput = @"/->-\
+        public string testinput3 = @"/->-\
 |   |  /----\
 | /-+--+-\  |
 | | |  | v  |
