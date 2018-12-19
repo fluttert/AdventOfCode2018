@@ -25,22 +25,22 @@ namespace AdventOfCode._2018
                     int playerId = i % players;
 
                     //scoreboard[playerId] += i;
-                    currentNode = currentNode.Previous == null ? game.Last : currentNode.Previous;
-                    currentNode = currentNode.Previous == null ? game.Last : currentNode.Previous;
-                    currentNode = currentNode.Previous == null ? game.Last : currentNode.Previous;
-                    currentNode = currentNode.Previous == null ? game.Last : currentNode.Previous;
-                    currentNode = currentNode.Previous == null ? game.Last : currentNode.Previous;
-                    currentNode = currentNode.Previous == null ? game.Last : currentNode.Previous;
-                    currentNode = currentNode.Previous == null ? game.Last : currentNode.Previous;
+                    currentNode = currentNode.Previous ?? game.Last;
+                    currentNode = currentNode.Previous ?? game.Last;
+                    currentNode = currentNode.Previous ?? game.Last;
+                    currentNode = currentNode.Previous ?? game.Last;
+                    currentNode = currentNode.Previous ?? game.Last;
+                    currentNode = currentNode.Previous ?? game.Last;
+                    currentNode = currentNode.Previous ?? game.Last;
                     int valueToRemove = currentNode.Value;
-                    currentNode = currentNode.Next == null ? game.First : currentNode.Next;
+                    currentNode = currentNode.Next ?? game.First;
                     scoreboard[playerId] += i + valueToRemove;
                     game.Remove(valueToRemove);
                 }
                 else
                 {
                     // skip 1 node and add after this
-                    currentNode = currentNode.Next == null ? game.First : currentNode.Next;
+                    currentNode = currentNode.Next ?? game.First;
                     game.AddAfter(currentNode, i);
                     currentNode = currentNode.Next;
                 }
@@ -48,6 +48,9 @@ namespace AdventOfCode._2018
             long highScore = scoreboard.Max(kvp => kvp.Value);
 
             Console.WriteLine($"Day09 part1 answer: {highScore}");
+
+            //Day09 part1 answer: 3516007333
+            //Got it solved in 1927135ms (32 minutes!!)
         }
 
         public string input = @"411 players; last marble is worth 7105800 points";
