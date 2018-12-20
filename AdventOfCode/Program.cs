@@ -11,10 +11,12 @@ namespace AdventOfCode
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
+            new Day14().Solve();
+            //new Day13().Solve();
             //new Day12().Solve();
             //new Day11().Solve();
             //new Day10().Solve();
-            new Day09().Solve(); 
+            //new Day09().Solve(); 
             //new Day08().Solve();
             //new Day07().Solve();
             //new Day06().Solve();
